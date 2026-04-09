@@ -45,7 +45,7 @@ public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
             .put("index.analysis.analyzer.text.filter", "jmorphy2")
             .build();
 
-        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings, home.resolve("config"));
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings);
         TestAnalysis analysis = createTestAnalysis
             (new Index("test", "_na_"), settings, plugin);
         assertThat(analysis.tokenFilter.get("jmorphy2"),

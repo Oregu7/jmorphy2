@@ -52,7 +52,7 @@ public class Jmorphy2SubjectTokenFilterFactoryTests extends ESTestCase {
 
         copyFilesFromResources(settings, "ru");
 
-        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings, home.resolve("config"));
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings);
         TestAnalysis analysis = createTestAnalysis
             (new Index("test", "_na_"), settings, plugin);
         assertThat(analysis.tokenFilter.get("jmorphy2_subject"),

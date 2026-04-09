@@ -7,7 +7,7 @@ buildscript {
     }
     dependencies {
         classpath("org.elasticsearch.gradle:build-tools:${project.getElasticsearchVersion()}")
-        classpath("com.netflix.nebula:gradle-ospackage-plugin:8.5.6")
+        classpath("com.netflix.nebula:gradle-ospackage-plugin:11.10.0")
     }
 }
 
@@ -108,7 +108,6 @@ tasks.register("deb", com.netflix.gradle.plugins.deb.Deb::class) {
     packageName = "elasticsearch-$pluginName-plugin"
 
     requires("elasticsearch", versions["elasticsearch"])
-        .or("elasticsearch-oss", versions["elasticsearch"])
 
     from(zipTree(tasks["bundlePlugin"].outputs.files.singleFile))
 

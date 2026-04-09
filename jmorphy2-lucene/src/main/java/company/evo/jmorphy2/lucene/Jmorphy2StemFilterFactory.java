@@ -11,15 +11,17 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.util.ResourceLoader;
-import org.apache.lucene.analysis.util.ResourceLoaderAware;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.ResourceLoader;
+import org.apache.lucene.analysis.ResourceLoaderAware;
+import org.apache.lucene.analysis.TokenFilterFactory;
 
 import company.evo.jmorphy2.JSONUtils;
 import company.evo.jmorphy2.MorphAnalyzer;
 
 // TODO: Move factories into jmorphy2-solr
 public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
+    public static final String NAME = "jmorphy2_stem";
+
     public static final String DICT_PATH_ATTR = "dict";
     public static final String REPLACES_PATH_ATTR = "replaces";
     // public static final String CACHE_SIZE_ATTR = "cacheSize";
@@ -50,6 +52,11 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
         this.excludeTags = parseTags(args.get(EXCLUDE_TAGS_ATTR));
         this.includeTags = parseTags(args.get(INCLUDE_TAGS_ATTR));
         this.enablePositionIncrements = getBoolean(args, ENABLE_POSITION_INCREMENTS_ATTR, true);
+    }
+
+    /** Default ctor for compatibility with SPI */
+    public Jmorphy2StemFilterFactory() {
+        throw defaultCtorException();
     }
 
     public void inform(ResourceLoader loader) throws IOException {

@@ -16,12 +16,11 @@
 
 package company.evo.jmorphy2.elasticsearch.plugin;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.elasticsearch.env.Environment;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
@@ -35,10 +34,9 @@ import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Service;
 public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
     private final Jmorphy2Service jmorphy2Service;
 
-    public AnalysisJmorphy2Plugin(Settings settings, Path configPath) {
-        super();
-        Environment env = new Environment(settings, configPath);
-        jmorphy2Service = new Jmorphy2Service(settings, env);
+    public AnalysisJmorphy2Plugin(Settings settings) {
+        Environment env = new Environment(settings, null);
+        this.jmorphy2Service = new Jmorphy2Service(settings, env);
     }
 
     @Override

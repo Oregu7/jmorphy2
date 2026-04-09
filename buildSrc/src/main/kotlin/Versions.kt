@@ -33,7 +33,7 @@ data class EsVersion(
 }
 
 object Versions {
-    val java = JavaVersion.VERSION_11
+    val java = JavaVersion.VERSION_17
 
     val commonsCodec = "[1.10, 1.11]"
     val commonsIo = "2.4"
@@ -63,11 +63,27 @@ object Versions {
         EsVersion(7, 12) to "8.8.0",
         EsVersion(7, 13) to "8.8.2",
         EsVersion(7, 14) to "8.9.0",
+        EsVersion(8, 0) to "9.0.0",
+        EsVersion(8, 1) to "9.0.0",
+        EsVersion(8, 2) to "9.1.0",
+        EsVersion(8, 3) to "9.2.0",
+        EsVersion(8, 4) to "9.3.0",
+        EsVersion(8, 5) to "9.4.0",
+        EsVersion(8, 6) to "9.4.1",
+        EsVersion(8, 7) to "9.5.0",
+        EsVersion(8, 8) to "9.6.0",
+        EsVersion(8, 9) to "9.7.0",
+        EsVersion(8, 10) to "9.7.0",
+        EsVersion(8, 11) to "9.8.0",
+        EsVersion(8, 12) to "9.8.1",
+        EsVersion(8, 13) to "9.10.0",
+        EsVersion(8, 14) to "9.10.1",
+        EsVersion(8, 15) to "9.11.1",
     )
 }
 
 fun Project.getLibraryVersion(): String {
-    return rootProject.file("project.version").readLines().first().toUpperCase().removeSuffix("-SNAPSHOT")
+    return rootProject.file("project.version").readLines().first().uppercase().removeSuffix("-SNAPSHOT")
 }
 
 fun Project.getElasticsearchDefaultVersion(): String {
