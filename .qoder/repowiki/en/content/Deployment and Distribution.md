@@ -18,7 +18,18 @@
 - [jmorphy2-core/build.gradle.kts](file://jmorphy2-core/build.gradle.kts)
 - [jmorphy2-elasticsearch/LICENSE.txt](file://jmorphy2-elasticsearch/LICENSE.txt)
 - [jmorphy2-elasticsearch/NOTICE.txt](file://jmorphy2-elasticsearch/NOTICE.txt)
+- [jmorphy2-elasticsearch/src/main/java/company/evo/jmorphy2/elasticsearch/plugin/AnalysisJmorphy2Plugin.java](file://jmorphy2-elasticsearch/src/main/java/company/evo/jmorphy2/elasticsearch/plugin/AnalysisJmorphy2Plugin.java)
+- [jmorphy2-elasticsearch/src/main/java/company/evo/jmorphy2/elasticsearch/index/Jmorphy2AnalyzerProvider.java](file://jmorphy2-elasticsearch/src/main/java/company/evo/jmorphy2/elasticsearch/index/Jmorphy2AnalyzerProvider.java)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated Elasticsearch version compatibility matrix to include ES 8.x series with Lucene 9.x mapping
+- Enhanced migration procedures section with comprehensive ES 7.x to 8.x migration documentation
+- Added detailed API changes documentation for plugin constructor signatures and factory methods
+- Updated build system modernization instructions including Java 17 upgrade and Gradle 8.x requirements
+- Revised Docker and CI/CD configurations to support ES 8.x deployment
+- Enhanced troubleshooting guide with ES 8.x specific deployment issues
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -37,7 +48,7 @@ This document describes the deployment and distribution approach for the jmorphy
 - Docker containerization for Elasticsearch integration, including the Dockerfile configuration and runtime installation of the Elasticsearch plugin.
 - Local development and testing with Vagga, including commands for assembling and installing the plugin locally.
 - CI/CD pipelines using GitHub Actions and AppVeyor for automated building, testing, and release of the Elasticsearch plugin.
-- Elasticsearch version compatibility and migration procedures for upgrades.
+- Elasticsearch version compatibility and migration procedures for upgrades, including comprehensive ES 7.x to 8.x migration documentation.
 - Plugin packaging for Elasticsearch, including version-specific builds and distribution channels.
 - Release procedures for core library, dictionary modules, and integration plugins.
 - Version management, dependency resolution, and compatibility checking.
@@ -129,7 +140,7 @@ AV --> Repo
 ## Detailed Component Analysis
 
 ### Docker Containerization for Elasticsearch Integration
-The Dockerfile uses the official Elasticsearch image and installs the jmorphy2 plugin by downloading a prebuilt ZIP from the GitHub Releases page. The default ES version is configurable via an ARG and is reflected in the plugin’s version suffix.
+The Dockerfile uses the official Elasticsearch image and installs the jmorphy2 plugin by downloading a prebuilt ZIP from the GitHub Releases page. The default ES version is configurable via an ARG and is reflected in the plugin's version suffix.
 
 ```mermaid
 flowchart TD
@@ -212,9 +223,12 @@ Rel-->>Dev : downloadable artifacts
 - Compatibility mapping:
   - The Versions.kt file maintains a map of Elasticsearch versions to Lucene versions.
   - The default ES version is 8.15.0; the plugin version embeds this as a suffix.
+  - ES 8.x series maps to Lucene 9.x series with specific version mappings.
 - Migration guidance:
-  - The migration report documents breaking changes for ES 8.x, including Java version upgrade, plugin constructor changes, factory signatures, Lucene 8 to 9 changes, and build toolchain updates.
-  - Recommended order of migration steps is provided, including updating es.version, Gradle wrapper, Kotlin plugin, Lucene artifacts, and plugin factories.
+  - The migration report documents breaking changes for ES 8.x, including Java version upgrade to 17, plugin constructor changes, factory signature modifications, Lucene 8 to 9 changes, and build toolchain updates.
+  - Recommended order of migration steps includes updating es.version, Gradle wrapper, Kotlin plugin, Lucene artifacts, and plugin factories.
+
+**Updated** Enhanced with comprehensive ES 7.x to 8.x migration documentation including API changes, Lucene 8 to 9 upgrade guidance, and build system modernization.
 
 ```mermaid
 flowchart TD
@@ -280,7 +294,7 @@ ElasticsearchPluginModule --> VersionsScript : "resolves versions"
   - Tests are executed via Gradle tasks; benchmarks are available separately.
 - Elasticsearch plugin:
   - Assembled into ZIP and Debian packages.
-  - On release tags containing “-es”, artifacts are uploaded to GitHub Releases.
+  - On release tags containing "-es", artifacts are uploaded to GitHub Releases.
 - Distribution channels:
   - ZIP: direct download from GitHub Releases.
   - Debian package: published alongside ZIP for Debian-based systems.
@@ -314,6 +328,8 @@ GH-->>User : downloadable artifacts
   - Modules declare dependencies on core and NLP components; Lucene module depends on Lucene artifacts resolved by the mapping.
 - Compatibility:
   - The migration report enumerates breaking changes and required updates for ES 8.x.
+
+**Updated** Enhanced with ES 8.x version mapping and Lucene 9.x compatibility requirements.
 
 ```mermaid
 flowchart TD
@@ -373,28 +389,35 @@ DictsUK --> ESPlugin
 
 ## Troubleshooting Guide
 - Elasticsearch plugin installation failures:
-  - Ensure the plugin ZIP matches the Elasticsearch version (suffix “-es<es>”).
+  - Ensure the plugin ZIP matches the Elasticsearch version (suffix "-es<es>").
   - Use the Vagga elastic command to install the assembled plugin into a local container.
 - Docker build issues:
   - Verify ES_VERSION argument matches the intended Elasticsearch version.
   - Confirm the release URL for the plugin ZIP is reachable.
 - CI/CD failures:
-  - Check that release tags include “-es<version>” to trigger artifact publishing.
+  - Check that release tags include "-es<version>" to trigger artifact publishing.
   - Validate JAVA_HOME and Gradle versions in CI environments.
 - Local development:
   - Use Vagga commands to assemble and install the plugin; confirm persistent volumes for Elasticsearch data and logs are configured.
+- ES 8.x specific issues:
+  - Ensure Java 17 compatibility for plugin construction and factory methods.
+  - Verify Lucene 9.x artifact compatibility and import package renames.
+  - Check for proper SPI implementation with NAME field and no-arg constructor requirements.
+
+**Updated** Added ES 8.x specific troubleshooting guidance for Java version compatibility, Lucene 9.x migration issues, and plugin construction changes.
 
 **Section sources**
 - [vagga.yaml:133-164](file://vagga.yaml#L133-L164)
 - [Dockerfile.elasticsearch:7-9](file://Dockerfile.elasticsearch#L7-L9)
 - [.github/workflows/java.yaml:36-45](file://.github/workflows/java.yaml#L36-L45)
+- [ES_8.x_Migration_Report_06a5fe0f.md:18-243](file://ES_8.x_Migration_Report_06a5fe0f.md#L18-L243)
 
 ## Conclusion
 The jmorphy2 project employs a robust deployment and distribution strategy centered on:
 - Clear version management and compatibility mapping.
 - Automated CI/CD pipelines that produce ZIP and Debian artifacts.
 - Local development workflows via Vagga and Docker.
-- Comprehensive migration guidance for Elasticsearch version upgrades.
+- Comprehensive migration guidance for Elasticsearch version upgrades, including detailed ES 7.x to 8.x migration procedures.
 This approach ensures reliable releases across multiple channels and environments.
 
 ## Appendices
@@ -402,6 +425,9 @@ This approach ensures reliable releases across multiple channels and environment
 ### Elasticsearch Version Compatibility Matrix (selected)
 - ES 8.15 maps to Lucene 9.11.1.
 - ES 8.x series maps to Lucene 9.x series with incremental versions.
+- ES 7.x series maps to Lucene 8.x series with established compatibility.
+
+**Updated** Enhanced with ES 8.x version mapping and Lucene 9.x compatibility details.
 
 **Section sources**
 - [buildSrc/src/main/kotlin/Versions.kt:66-82](file://buildSrc/src/main/kotlin/Versions.kt#L66-L82)
@@ -416,3 +442,24 @@ This approach ensures reliable releases across multiple channels and environment
 **Section sources**
 - [.github/workflows/java.yaml:58-112](file://.github/workflows/java.yaml#L58-L112)
 - [jmorphy2-elasticsearch/build.gradle.kts:105-126](file://jmorphy2-elasticsearch/build.gradle.kts#L105-L126)
+
+### ES 8.x Migration Implementation Details
+- Java 17 Upgrade:
+  - All build scripts updated to use Java 17 for ES 8.x compatibility.
+  - GitHub Actions workflow upgraded to Java 17 with latest action versions.
+- Plugin Constructor Changes:
+  - AnalysisJmorphy2Plugin now uses no-arg constructor with createComponents() method.
+  - Jmorphy2Service initialized in createComponents() lifecycle method.
+- Factory Method Updates:
+  - Token filter factories updated to remove IndexSettings parameter.
+  - Analyzer provider constructor simplified to (String, Settings).
+- Lucene 9.x Migration:
+  - Artifact names updated from lucene-analyzers-common to lucene-analysis-common.
+  - Import package renames for TokenFilterFactory, ResourceLoader, and ResourceLoaderAware.
+  - SPI requirements implemented with NAME field and no-arg constructor.
+
+**Section sources**
+- [ES_8.x_Migration_Report_06a5fe0f.md:16-261](file://ES_8.x_Migration_Report_06a5fe0f.md#L16-L261)
+- [jmorphy2-elasticsearch/src/main/java/company/evo/jmorphy2/elasticsearch/plugin/AnalysisJmorphy2Plugin.java:34-69](file://jmorphy2-elasticsearch/src/main/java/company/evo/jmorphy2/elasticsearch/plugin/AnalysisJmorphy2Plugin.java#L34-L69)
+- [jmorphy2-elasticsearch/src/main/java/company/evo/jmorphy2/elasticsearch/index/Jmorphy2AnalyzerProvider.java:29-53](file://jmorphy2-elasticsearch/src/main/java/company/evo/jmorphy2/elasticsearch/index/Jmorphy2AnalyzerProvider.java#L29-L53)
+- [jmorphy2-lucene/build.gradle.kts:6-8](file://jmorphy2-lucene/build.gradle.kts#L6-L8)
