@@ -16,16 +16,18 @@
 
 package company.evo.jmorphy2.elasticsearch.plugin;
 
-import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.plugins.Plugin.PluginServices;
 
 import company.evo.jmorphy2.elasticsearch.index.Jmorphy2StemTokenFilterFactory;
 import company.evo.jmorphy2.elasticsearch.index.Jmorphy2SubjectTokenFilterFactory;
@@ -33,12 +35,22 @@ import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Service;
 
 
 public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
-    private final Jmorphy2Service jmorphy2Service;
+    private Jmorphy2Service jmorphy2Service;
 
-    public AnalysisJmorphy2Plugin(Settings settings, Path configPath) {
+    public AnalysisJmorphy2Plugin() {
         super();
-        Environment env = new Environment(settings, configPath);
+    }
+
+    // Visible for testing
+    public void initService(Settings settings, Environment env) {
         jmorphy2Service = new Jmorphy2Service(settings, env);
+    }
+
+    @Override
+    public Collection<Object> createComponents(PluginServices services) {
+        Environment env = services.environment();
+        jmorphy2Service = new Jmorphy2Service(env.settings(), env);
+        return java.util.Collections.singletonList(jmorphy2Service);
     }
 
     @Override
@@ -47,12 +59,12 @@ public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
         tokenFilters.put("jmorphy2_stemmer",
             (Jmorphy2AnalysisProvider) (indexSettings, environment, name, settings) ->
                 new Jmorphy2StemTokenFilterFactory
-                    (indexSettings, environment, name, settings, jmorphy2Service)
+                    (name, settings, jmorphy2Service)
         );
         tokenFilters.put("jmorphy2_subject",
             (Jmorphy2AnalysisProvider) (indexSettings, environment, name, settings) ->
                 new Jmorphy2SubjectTokenFilterFactory
-                    (indexSettings, environment, name, settings, jmorphy2Service)
+                    (name, settings, jmorphy2Service)
         );
         return tokenFilters;
     }

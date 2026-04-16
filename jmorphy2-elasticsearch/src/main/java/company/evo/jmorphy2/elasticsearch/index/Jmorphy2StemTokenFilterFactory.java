@@ -27,8 +27,6 @@ import company.evo.jmorphy2.lucene.Jmorphy2StemFilter;
 import org.apache.lucene.analysis.TokenStream;
 
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.env.Environment;
-import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 
 import static company.evo.jmorphy2.lucene.Jmorphy2StemFilterFactory.parseTags;
@@ -42,12 +40,10 @@ public class Jmorphy2StemTokenFilterFactory extends AbstractTokenFilterFactory {
     private final List<Set<String>> includeTags;
     private final List<Set<String>> excludeTags;
 
-    public Jmorphy2StemTokenFilterFactory(IndexSettings indexSettings,
-                                          Environment environment,
-                                          String name,
+    public Jmorphy2StemTokenFilterFactory(String name,
                                           Settings settings,
                                           Jmorphy2Service jmorphy2Service) {
-        super(indexSettings, name, settings);
+        super(name, settings);
 
         String lang = settings.get("lang", settings.get("name"));
         String substitutesPath = settings.get("char_substitutes_path");

@@ -19,25 +19,32 @@ package company.evo.jmorphy2.elasticsearch.index;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakFilters;
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
+
 import static org.hamcrest.Matchers.instanceOf;
 
 import org.apache.lucene.analysis.Analyzer;
-import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
+import static org.apache.lucene.tests.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
+import org.elasticsearch.index.Index;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
-import org.elasticsearch.index.Index;
 import org.elasticsearch.test.ESTestCase;
 
 import company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin;
 
 
+@ThreadLeakFilters(defaultFilters = true, filters = {ForkJoinPoolThreadFilter.class})
+@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
 
     public void testJmorphy2StemTokenFilter() throws IOException {
         Path home = createTempDir();
-        Settings settings = Settings.builder()
+        Settings nodeSettings = Settings.builder()
             .put(Environment.PATH_HOME_SETTING.getKey(), home.toString())
+            .build();
+        Settings indexSettings = Settings.builder()
             .put("index.analysis.filter.jmorphy2.type", "jmorphy2_stemmer")
             .put("index.analysis.filter.jmorphy2.name", "ru")
             .put("index.analysis.filter.jmorphy2.exclude_tags", "NPRO PREP CONJ PRCL INTJ")
@@ -45,9 +52,9 @@ public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
             .put("index.analysis.analyzer.text.filter", "jmorphy2")
             .build();
 
-        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings, home.resolve("config"));
-        TestAnalysis analysis = createTestAnalysis
-            (new Index("test", "_na_"), settings, plugin);
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin();
+        plugin.initService(nodeSettings, new Environment(nodeSettings, home.resolve("config")));
+        TestAnalysis analysis = createTestAnalysis(new Index("test", "_na_"), indexSettings, plugin);
         assertThat(analysis.tokenFilter.get("jmorphy2"),
                    instanceOf(Jmorphy2StemTokenFilterFactory.class));
 

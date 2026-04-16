@@ -25,8 +25,8 @@ tasks.register<Jar>(
     name = "jarTest"
 ) {
     dependsOn("testClasses")
-    classifier = "tests"
-    from(sourceSets.test)
+    archiveClassifier.set("tests")
+    from(sourceSets.test.get().output)
 }
 
 configurations.register("tests") {
