@@ -95,7 +95,7 @@ public class Jmorphy2Service {
                 .cacheSize(key.cacheSize)
                 .dictPath(dictsPath.toString());
             if (key.substitutesPath != null) {
-                Path substitutesPath = env.configDir().resolve(key.substitutesPath);
+                Path substitutesPath = env.configFile().resolve(key.substitutesPath);
                 morphBuilder.charSubstitutes(parseSubstitutes(substitutesPath));
             }
 
@@ -119,7 +119,7 @@ public class Jmorphy2Service {
             .cacheSize(key.cacheSize)
             .fileLoader(loader);
         if (key.substitutesPath != null) {
-            Path substitutesPath = env.configDir().resolve(key.substitutesPath);
+            Path substitutesPath = env.configFile().resolve(key.substitutesPath);
             morphBuilder.charSubstitutes(parseSubstitutes(substitutesPath));
         }
 
@@ -134,7 +134,7 @@ public class Jmorphy2Service {
             Tagger tagger;
             if (key.taggerRulesPath != null) {
                 try (InputStream rulesStream =
-                             Files.newInputStream(env.configDir().resolve(key.taggerRulesPath))) {
+                             Files.newInputStream(env.configFile().resolve(key.taggerRulesPath))) {
                     tagger = new SimpleTagger(morph,
                                               new Ruleset(rulesStream),
                                               key.taggerThreshold);
@@ -145,7 +145,7 @@ public class Jmorphy2Service {
             Parser parser;
             if (key.parserRulesPath != null) {
                 try (InputStream rulesStream =
-                     Files.newInputStream(env.configDir().resolve(key.parserRulesPath))) {
+                     Files.newInputStream(env.configFile().resolve(key.parserRulesPath))) {
                     parser = new SimpleParser(morph,
                                               tagger,
                                               new Ruleset(rulesStream),
@@ -156,7 +156,7 @@ public class Jmorphy2Service {
             }
             String extractorRules;
             if (key.extractorRulesPath != null) {
-                extractorRules = Files.readString(env.configDir().resolve(key.extractorRulesPath));
+                extractorRules = Files.readString(env.configFile().resolve(key.extractorRulesPath));
             } else {
                 extractorRules = "+NP,nomn +NP,accs -PP -Geox NOUN,nomn NOUN,accs LATN NUMB";
             }
@@ -168,7 +168,7 @@ public class Jmorphy2Service {
     }
 
     private Path resolveJmorphy2Directory(Settings settings, Environment env) {
-        Path configDir = env.configDir();
+        Path configDir = env.configFile();
         String dictsLocation = settings.get(JMORPHY2_DICT_LOCATION_SETTING, null);
         if (dictsLocation != null) {
             return configDir.resolve(dictsLocation);
