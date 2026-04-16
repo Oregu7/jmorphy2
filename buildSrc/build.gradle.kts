@@ -5,9 +5,8 @@ plugins {
 
 repositories {
     mavenLocal()
-    repositories {
-        maven("https://plugins.gradle.org/m2/")
-    }
+    mavenCentral()
+    maven("https://plugins.gradle.org/m2/")
 }
 
 idea {
@@ -18,5 +17,5 @@ idea {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.24")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
 }

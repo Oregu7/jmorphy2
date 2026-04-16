@@ -24,15 +24,7 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
     public static final String NAME = "jmorphy2_subject";
 
     public Jmorphy2SubjectFilterFactory() {
-        super();
-        this.dictPath = DEFAULT_DICT_PATH;
-        this.replacesPath = null;
-        this.taggerRulesPath = null;
-        this.taggerThreshold = SimpleTagger.DEFAULT_THRESHOLD;
-        this.parserRulesPath = null;
-        this.parserThreshold = SimpleParser.DEFAULT_THRESHOLD;
-        this.extract = null;
-        this.maxSentenceLength = DEFAULT_MAX_SENTENCE_LENGTH;
+        throw defaultCtorException();
     }
 
     public static final String DICT_PATH_ATTR = "dict";

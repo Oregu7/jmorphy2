@@ -7,7 +7,7 @@ buildscript {
     }
     dependencies {
         classpath("org.elasticsearch.gradle:build-tools:${project.getElasticsearchVersion()}")
-        classpath("com.netflix.nebula:gradle-ospackage-plugin:11.10.1")
+        classpath("com.netflix.nebula:gradle-ospackage-plugin:12.2.0")
     }
 }
 

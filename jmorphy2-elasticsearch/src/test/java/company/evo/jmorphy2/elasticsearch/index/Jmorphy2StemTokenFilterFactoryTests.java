@@ -35,14 +35,16 @@ import org.elasticsearch.test.ESTestCase;
 import company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin;
 
 
-@ThreadLeakFilters(defaultFilters = true, filters = {})
+@ThreadLeakFilters(defaultFilters = true, filters = {ForkJoinPoolThreadFilter.class})
 @ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
 
     public void testJmorphy2StemTokenFilter() throws IOException {
         Path home = createTempDir();
-        Settings settings = Settings.builder()
+        Settings nodeSettings = Settings.builder()
             .put(Environment.PATH_HOME_SETTING.getKey(), home.toString())
+            .build();
+        Settings indexSettings = Settings.builder()
             .put("index.analysis.filter.jmorphy2.type", "jmorphy2_stemmer")
             .put("index.analysis.filter.jmorphy2.name", "ru")
             .put("index.analysis.filter.jmorphy2.exclude_tags", "NPRO PREP CONJ PRCL INTJ")
@@ -51,8 +53,8 @@ public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
             .build();
 
         AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin();
-        plugin.initService(settings, new Environment(settings, home.resolve("config")));
-        TestAnalysis analysis = createTestAnalysis(new Index("test", "_na_"), settings, plugin);
+        plugin.initService(nodeSettings, new Environment(nodeSettings, home.resolve("config")));
+        TestAnalysis analysis = createTestAnalysis(new Index("test", "_na_"), indexSettings, plugin);
         assertThat(analysis.tokenFilter.get("jmorphy2"),
                    instanceOf(Jmorphy2StemTokenFilterFactory.class));
 

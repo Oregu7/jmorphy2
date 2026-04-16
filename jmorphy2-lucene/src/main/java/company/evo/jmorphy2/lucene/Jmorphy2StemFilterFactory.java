@@ -20,15 +20,10 @@ import company.evo.jmorphy2.MorphAnalyzer;
 
 // TODO: Move factories into jmorphy2-solr
 public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
-    public static final String NAME = "jmorphy2_stem";
+    public static final String NAME = "jmorphy2_stemmer";
 
     public Jmorphy2StemFilterFactory() {
-        super();
-        this.dictPath = DEFAULT_DICT_PATH;
-        this.replacesPath = null;
-        this.includeTags = null;
-        this.excludeTags = null;
-        this.enablePositionIncrements = true;
+        throw defaultCtorException();
     }
 
     public static final String DICT_PATH_ATTR = "dict";
