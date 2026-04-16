@@ -19,20 +19,25 @@ package company.evo.jmorphy2.elasticsearch.index;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakFilters;
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
+
 import static org.hamcrest.Matchers.instanceOf;
 
 import org.apache.lucene.analysis.Analyzer;
-import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
+import static org.apache.lucene.tests.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
+import org.elasticsearch.index.Index;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
-import org.elasticsearch.index.Index;
 import org.elasticsearch.test.ESTestCase;
 
 import company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin;
 import static company.evo.jmorphy2.elasticsearch.index.Utils.copyFilesFromResources;
 
 
+@ThreadLeakFilters(defaultFilters = true, filters = {})
+@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public class Jmorphy2SubjectTokenFilterFactoryTests extends ESTestCase {
     public void testSubjectTokenFilter() throws IOException {
         Path home = createTempDir();
@@ -52,9 +57,9 @@ public class Jmorphy2SubjectTokenFilterFactoryTests extends ESTestCase {
 
         copyFilesFromResources(settings, "ru");
 
-        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings, home.resolve("config"));
-        TestAnalysis analysis = createTestAnalysis
-            (new Index("test", "_na_"), settings, plugin);
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin();
+        plugin.initService(settings, new Environment(settings, home.resolve("config")));
+        TestAnalysis analysis = createTestAnalysis(new Index("test", "_na_"), settings, plugin);
         assertThat(analysis.tokenFilter.get("jmorphy2_subject"),
                    instanceOf(Jmorphy2SubjectTokenFilterFactory.class));
 

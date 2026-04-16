@@ -19,8 +19,6 @@ package company.evo.jmorphy2.elasticsearch.index;
 import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Service;
 
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.env.Environment;
-import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractIndexAnalyzerProvider;
 
 import company.evo.jmorphy2.lucene.Jmorphy2Analyzer;
@@ -31,12 +29,10 @@ public class Jmorphy2AnalyzerProvider extends AbstractIndexAnalyzerProvider<Jmor
 
     private final Jmorphy2Analyzer analyzer;
 
-    public Jmorphy2AnalyzerProvider(IndexSettings indexSettings,
-                                    Environment environment,
-                                    String name,
+    public Jmorphy2AnalyzerProvider(String name,
                                     Settings settings,
                                     Jmorphy2Service jmorphy2Service) {
-        super(indexSettings, name, settings);
+        super(name, settings);
         analyzer = new Jmorphy2Analyzer(
             jmorphy2Service.getMorphAnalyzer(
                 DEFAULT_LANGUAGE, null, Jmorphy2StemTokenFilterFactory.DEFAULT_CACHE_SIZE

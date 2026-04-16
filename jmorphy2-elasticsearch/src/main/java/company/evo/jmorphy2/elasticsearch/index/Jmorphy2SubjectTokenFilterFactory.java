@@ -21,8 +21,6 @@ import java.util.Locale;
 import org.apache.lucene.analysis.TokenStream;
 
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.env.Environment;
-import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 
 import company.evo.jmorphy2.nlp.SimpleParser;
@@ -36,12 +34,10 @@ public class Jmorphy2SubjectTokenFilterFactory extends AbstractTokenFilterFactor
     private final SubjectExtractor subjExtractor;
     private final int maxSentenceLength;
 
-    public Jmorphy2SubjectTokenFilterFactory(IndexSettings indexSettings,
-                                             Environment environment,
-                                             String name,
+    public Jmorphy2SubjectTokenFilterFactory(String name,
                                              Settings settings,
                                              Jmorphy2Service jmorphy2Service) {
-        super(indexSettings, name, settings);
+        super(name, settings);
 
         String lang = settings.get("lang", settings.get("name"));
         if (lang == null) {

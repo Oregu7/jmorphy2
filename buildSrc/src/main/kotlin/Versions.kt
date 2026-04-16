@@ -33,7 +33,7 @@ data class EsVersion(
 }
 
 object Versions {
-    val java = JavaVersion.VERSION_11
+    val java = JavaVersion.VERSION_17
 
     val commonsCodec = "[1.10, 1.11]"
     val commonsIo = "2.4"
@@ -63,6 +63,7 @@ object Versions {
         EsVersion(7, 12) to "8.8.0",
         EsVersion(7, 13) to "8.8.2",
         EsVersion(7, 14) to "8.9.0",
+        EsVersion(8, 19) to "9.12.2",
     )
 }
 

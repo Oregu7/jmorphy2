@@ -7,13 +7,13 @@ buildscript {
     }
     dependencies {
         classpath("org.elasticsearch.gradle:build-tools:${project.getElasticsearchVersion()}")
-        classpath("com.netflix.nebula:gradle-ospackage-plugin:8.5.6")
+        classpath("com.netflix.nebula:gradle-ospackage-plugin:11.10.1")
     }
 }
 
 apply(plugin = "idea")
 apply(plugin = "elasticsearch.esplugin")
-apply(plugin = "nebula.ospackage")
+apply(plugin = "com.netflix.nebula.ospackage")
 
 val pluginName = "analysis-jmorphy2"
 configure<org.elasticsearch.gradle.plugin.PluginPropertiesExtension> {
@@ -96,6 +96,9 @@ tasks.register<Copy>("copyShadowClasses") {
 tasks.named("classes") {
     dependsOn("copyShadowClasses")
 }
+
+tasks.findByName("generateTestBuildInfo")?.dependsOn("copyShadowClasses")
+tasks.findByName("pluginProperties")?.dependsOn("copyShadowClasses")
 
 // prior 7.13
 tasks.findByName("validateNebulaPom")?.enabled = false

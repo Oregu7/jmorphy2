@@ -1,4 +1,2 @@
-grant {
-  // Caffeine
-  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
-};
+// This file is no longer used in Elasticsearch 8.x
+// Security is now managed via entitlement-policy.yaml

@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.util.ResourceLoader;
-import org.apache.lucene.analysis.util.ResourceLoaderAware;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.util.ResourceLoader;
+import org.apache.lucene.util.ResourceLoaderAware;
+import org.apache.lucene.analysis.TokenFilterFactory;
 
 import company.evo.jmorphy2.MorphAnalyzer;
 import company.evo.jmorphy2.JSONUtils;
@@ -21,6 +21,20 @@ import company.evo.jmorphy2.nlp.SubjectExtractor;
 
 // TODO: Move factories into jmorphy2-solr
 public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
+    public static final String NAME = "jmorphy2_subject";
+
+    public Jmorphy2SubjectFilterFactory() {
+        super();
+        this.dictPath = DEFAULT_DICT_PATH;
+        this.replacesPath = null;
+        this.taggerRulesPath = null;
+        this.taggerThreshold = SimpleTagger.DEFAULT_THRESHOLD;
+        this.parserRulesPath = null;
+        this.parserThreshold = SimpleParser.DEFAULT_THRESHOLD;
+        this.extract = null;
+        this.maxSentenceLength = DEFAULT_MAX_SENTENCE_LENGTH;
+    }
+
     public static final String DICT_PATH_ATTR = "dict";
     public static final String REPLACES_PATH_ATTR = "replaces";
     // public static final String CACHE_SIZE_ATTR = "cacheSize";

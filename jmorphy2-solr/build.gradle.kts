@@ -10,5 +10,5 @@ dependencies {
     implementation("org.apache.solr:solr-core:${project.getLuceneVersion()}")
 
     implementation(project(":jmorphy2-lucene"))
-    testImplementation(files(project(":jmorphy2-core")))
+    testImplementation(project(path = ":jmorphy2-core", configuration = "tests"))
 }
