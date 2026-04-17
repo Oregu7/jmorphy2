@@ -3,139 +3,202 @@
 
 # Jmorphy2
 
-Java port of the [pymorphy2](https://github.com/kmike/pymorphy2)
+Java port of the [pymorphy2](https://github.com/kmike/pymorphy2) — morphological analyzer for Russian and Ukrainian languages.
+Provides an analysis plugin for Elasticsearch with stemming and subject extraction token filters.
 
-Clone project:
+## Requirements
 
-```sh
+- **Java 17** or later (JDK, not JRE — needed for compilation)
+- **Git**
+
+Verify that Java is installed and has the correct version:
+
+```shell
+java -version
+```
+
+The output should contain `version "17.x.x"` or higher. If Java is not installed, download
+[OpenJDK 17](https://adoptium.net/temurin/releases/?version=17) or install via a package manager:
+
+```shell
+# macOS (Homebrew)
+brew install openjdk@17
+
+# Ubuntu / Debian
+sudo apt install openjdk-17-jdk
+
+# Fedora
+sudo dnf install java-17-openjdk-devel
+```
+
+## Building from source
+
+### 1. Clone the repository
+
+```shell
 git clone https://github.com/anti-social/jmorphy2
 cd jmorphy2
 ```
 
-Compile project, build jars and run tests:
+### 2. Build the Elasticsearch plugin
+
+The project uses a Gradle wrapper — you do **not** need to install Gradle separately.
+On the first run it will be downloaded automatically.
+
+```shell
+./gradlew :jmorphy2-elasticsearch:assemble
+```
+
+This command compiles the project, downloads the required morphological dictionaries,
+and packages the plugin into a zip archive ready for installation into Elasticsearch.
+
+> On Windows use `gradlew.bat` instead of `./gradlew`.
+
+### 3. Where to find the built plugin
+
+After a successful build the artifacts are located in:
 
 ```
+jmorphy2-elasticsearch/build/distributions/
+```
+
+The directory contains:
+
+| File | Description |
+|------|-------------|
+| `analysis-jmorphy2-<version>-es8.15.0.zip` | Plugin zip archive for `elasticsearch-plugin install` |
+| `elasticsearch-analysis-jmorphy2-plugin_<version>~es8.15.0_all.deb` | Debian package for apt-based installation |
+
+For example, for version 0.2.4:
+
+```
+analysis-jmorphy2-0.2.4-es8.15.0.zip
+elasticsearch-analysis-jmorphy2-plugin_0.2.4~es8.15.0_all.deb
+```
+
+### 4. Run the tests (optional)
+
+```shell
+./gradlew :jmorphy2-elasticsearch:test
+```
+
+### 5. Build the whole project (all modules + tests)
+
+```shell
 ./gradlew build
 ```
 
 ## Elasticsearch plugin
 
-### Plugin installation
+Default Elasticsearch version: **8.15.0** (Lucene 9.11.1).
+Supported Elasticsearch versions: **8.15.x**. Builds and runtime require **Java 17**.
 
-- From a debian package:
+### Installing the plugin
 
-```shell
-curl -SLO https://github.com/anti-social/jmorphy2/releases/download/v0.2.3-es7.14.2/elasticsearch-analysis-jmorphy2-plugin_0.2.3-es7.14.2_all.deb
-dpkg -i elasticsearch-analysis-jmorphy2-plugin_0.2.3-es7.14.2_all.deb
-```
+#### From a local build
 
-- Using `elasticsearch-plugin` command:
-```shell
-# Specify correct path of your Elasticsearch installation
-export es_home=/usr/share/elasticsearch
-${es_home}/bin/elasticsearch-plugin install "https://github.com/anti-social/jmorphy2/releases/download/v0.2.3-es7.14.2/analysis-jmorphy2-0.2.3-es7.14.2.zip"
-```
-
-### Building plugin
-
-Default elasticsearch version against which plugin is built is `7.14.2`
-
-To build for specific elastisearch version run build as:
-
-```shell
-./gradlew assemble -PesVersion=7.13.4
-```
-
-Supported elasticsearch versions: `6.6.x`, `6.7.x`, `6.8.x`, `7.0.x`, `7.1.x`, `7.2.x`, `7.3.x`, `7.4.x`, `7.5.x`, `7.6.x`, `7.7.x`, `7.8.x`, `7.9.x`, `7.10.x`, `7.11.x`, `7.12.x`, `7.13.x`, `7.14.x`
-
-For older elasticsearch version use specific branches:
-
-- `es-5.4` for Elasticsearch `5.4.x`, `5.5.x` and `5.6.x`
-- `es-5.1` for Elasticsearch `5.1.x`, `5.2.x` and `5.3.x`
-
-And install assembled plugin:
+After building the project (see above), install the plugin from the local zip file:
 
 ```shell
 # Specify correct path of your Elasticsearch installation
 export es_home=/usr/share/elasticsearch
-sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.2-SNAPSHOT-es7.13.2.zip
+sudo ${es_home}/bin/elasticsearch-plugin install "file://$(pwd)/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.4-SNAPSHOT-es8.15.0.zip"
 ```
 
-Or just run elasticsearch inside the container 
-(only works for plugin built for default Elasticsearch version):
+### Running with Docker Compose
+
+The project includes `docker-compose.yaml` and `Dockerfile.elasticsearch` that build a Docker image
+with the locally compiled plugin already installed into Elasticsearch.
+
+**1. Build the plugin** (if you haven't already):
 
 ```shell
-# build container and run elasticsearch with jmorphy2 plugin
-vagga elastic
+./gradlew :jmorphy2-elasticsearch:assemble
 ```
 
-Using podman or docker:
+**2. Build the Docker image and start the container:**
 
 ```shell
-podman build -t elasticsearch-jmorphy2 -f Dockerfile.elasticsearch .github
-podman run --name elasticsearch-jmorphy2 -p 9200:9200 -e "ES_JAVA_OPTS=-Xmx1g" -e "discovery.type=single-node" elasticsearch-jmorphy2
+docker compose up -d
 ```
 
-### Test elasticsearch with jmorphy2 plugin
+This will:
+- build a Docker image based on the official `elasticsearch:8.15.0` image,
+- copy the plugin zip from `jmorphy2-elasticsearch/build/distributions/` into the image,
+- install the plugin via `elasticsearch-plugin install`,
+- start Elasticsearch on port `9200` with security disabled (for local development).
 
-Create index with specific analyzer and test it:
-
+**3. Check that Elasticsearch is running:**
 
 ```shell
-curl -X PUT -H 'Content-Type: application/yaml' 'localhost:9200/test_index' -d '---
-settings:
-  index:
-    analysis:
-      filter:
-        delimiter:
-          type: word_delimiter
-          preserve_original: true
-        jmorphy2_russian:
-          type: jmorphy2_stemmer
-          name: ru
-        jmorphy2_ukrainian:
-          type: jmorphy2_stemmer
-          name: uk
-      analyzer:
-        text_ru:
-          tokenizer: standard
-          filter:
-          - delimiter
-          - lowercase
-          - jmorphy2_russian
-        text_uk:
-          tokenizer: standard
-          filter:
-          - delimiter
-          - lowercase
-          - jmorphy2_ukrainian
-'
+curl -s http://localhost:9200/
+```
 
-# Test russian analyzer
-curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
-analyzer: text_ru
-text: Привет, лошарики!
-'
-curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
-analyzer: text_ru
-text: ёж еж ежики
-'
-curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
-analyzer: text_ru
-text: путин
-'
+Wait a few seconds after startup. You should see a JSON response with `"number" : "8.15.0"`.
 
-# Test ukrainian analyzer
-curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
-analyzer: text_uk
-text: Пригоди Котигорошка
-'
-curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
-analyzer: text_uk
-text: їжаки
-'
-curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
-analyzer: text_uk
-text: комп\'ютером
-'
+**4. Rebuild after code changes:**
+
+If you modify the plugin code, rebuild and restart the container:
+
+```shell
+./gradlew :jmorphy2-elasticsearch:assemble
+docker compose up -d --build
+```
+
+**5. Stop and clean up:**
+
+```shell
+docker compose down
+```
+
+To also remove the Elasticsearch data volume:
+
+```shell
+docker compose down -v
+```
+
+### Testing the plugin
+
+Once Elasticsearch is running, create an index with the jmorphy2 analyzer and test it:
+
+```shell
+# Create an index with Russian and Ukrainian analyzers
+curl -X PUT -H 'Content-Type: application/json' 'localhost:9200/test_index' -d '{
+  "settings": {
+    "index": {
+      "analysis": {
+        "filter": {
+          "jmorphy2_russian": {
+            "type": "jmorphy2_stemmer",
+            "name": "ru"
+          },
+          "jmorphy2_ukrainian": {
+            "type": "jmorphy2_stemmer",
+            "name": "uk"
+          }
+        },
+        "analyzer": {
+          "text_ru": {
+            "tokenizer": "standard",
+            "filter": ["lowercase", "jmorphy2_russian"]
+          },
+          "text_uk": {
+            "tokenizer": "standard",
+            "filter": ["lowercase", "jmorphy2_ukrainian"]
+          }
+        }
+      }
+    }
+  }
+}'
+
+# Test Russian analyzer: "теплые перчатки" → "тёплый", "перчатка"
+curl -s -X GET -H 'Content-Type: application/json' \
+  'localhost:9200/test_index/_analyze' \
+  -d '{"analyzer": "text_ru", "text": "теплые перчатки"}'
+
+# Test Ukrainian analyzer: "Пригоди Котигорошка"
+curl -s -X GET -H 'Content-Type: application/json' \
+  'localhost:9200/test_index/_analyze' \
+  -d '{"analyzer": "text_uk", "text": "Пригоди Котигорошка"}'
 ```

@@ -21,8 +21,10 @@ import java.nio.file.Path;
 
 import static org.hamcrest.Matchers.instanceOf;
 
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakFilters;
+
 import org.apache.lucene.analysis.Analyzer;
-import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
+import static org.apache.lucene.tests.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
@@ -32,12 +34,15 @@ import org.elasticsearch.test.ESTestCase;
 import company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin;
 
 
+@ThreadLeakFilters(filters = {ForkJoinPoolThreadFilter.class})
 public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
 
     public void testJmorphy2StemTokenFilter() throws IOException {
         Path home = createTempDir();
-        Settings settings = Settings.builder()
+        Settings nodeSettings = Settings.builder()
             .put(Environment.PATH_HOME_SETTING.getKey(), home.toString())
+            .build();
+        Settings indexSettings = Settings.builder()
             .put("index.analysis.filter.jmorphy2.type", "jmorphy2_stemmer")
             .put("index.analysis.filter.jmorphy2.name", "ru")
             .put("index.analysis.filter.jmorphy2.exclude_tags", "NPRO PREP CONJ PRCL INTJ")
@@ -45,9 +50,9 @@ public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
             .put("index.analysis.analyzer.text.filter", "jmorphy2")
             .build();
 
-        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings, home.resolve("config"));
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(nodeSettings, home.resolve("config"));
         TestAnalysis analysis = createTestAnalysis
-            (new Index("test", "_na_"), settings, plugin);
+            (new Index("test", "_na_"), nodeSettings, indexSettings, plugin);
         assertThat(analysis.tokenFilter.get("jmorphy2"),
                    instanceOf(Jmorphy2StemTokenFilterFactory.class));
 

@@ -21,8 +21,10 @@ import java.nio.file.Path;
 
 import static org.hamcrest.Matchers.instanceOf;
 
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakFilters;
+
 import org.apache.lucene.analysis.Analyzer;
-import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
+import static org.apache.lucene.tests.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
@@ -33,11 +35,14 @@ import company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin;
 import static company.evo.jmorphy2.elasticsearch.index.Utils.copyFilesFromResources;
 
 
+@ThreadLeakFilters(filters = {ForkJoinPoolThreadFilter.class})
 public class Jmorphy2SubjectTokenFilterFactoryTests extends ESTestCase {
     public void testSubjectTokenFilter() throws IOException {
         Path home = createTempDir();
-        Settings settings = Settings.builder()
+        Settings nodeSettings = Settings.builder()
             .put(Environment.PATH_HOME_SETTING.getKey(), home.toString())
+            .build();
+        Settings indexSettings = Settings.builder()
             .put("index.analysis.filter.jmorphy2_subject.type", "jmorphy2_subject")
             .put("index.analysis.filter.jmorphy2_subject.name", "ru")
             .put("index.analysis.filter.jmorphy2_subject.tagger_rules_path",
@@ -50,11 +55,11 @@ public class Jmorphy2SubjectTokenFilterFactoryTests extends ESTestCase {
             .put("index.analysis.analyzer.text.filter", "jmorphy2_subject")
             .build();
 
-        copyFilesFromResources(settings, "ru");
+        copyFilesFromResources(nodeSettings, "ru");
 
-        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings, home.resolve("config"));
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(nodeSettings, home.resolve("config"));
         TestAnalysis analysis = createTestAnalysis
-            (new Index("test", "_na_"), settings, plugin);
+            (new Index("test", "_na_"), nodeSettings, indexSettings, plugin);
         assertThat(analysis.tokenFilter.get("jmorphy2_subject"),
                    instanceOf(Jmorphy2SubjectTokenFilterFactory.class));
 
