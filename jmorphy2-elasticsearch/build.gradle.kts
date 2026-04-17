@@ -1,5 +1,3 @@
-import java.nio.file.Paths
-
 buildscript {
     repositories {
         mavenCentral()
@@ -7,13 +5,13 @@ buildscript {
     }
     dependencies {
         classpath("org.elasticsearch.gradle:build-tools:${project.getElasticsearchVersion()}")
-        classpath("com.netflix.nebula:gradle-ospackage-plugin:8.5.6")
+        classpath("com.netflix.nebula:gradle-ospackage-plugin:12.2.0")
     }
 }
 
 apply(plugin = "idea")
 apply(plugin = "elasticsearch.esplugin")
-apply(plugin = "nebula.ospackage")
+apply(plugin = "com.netflix.nebula.ospackage")
 
 val pluginName = "analysis-jmorphy2"
 configure<org.elasticsearch.gradle.plugin.PluginPropertiesExtension> {
@@ -97,9 +95,10 @@ tasks.named("classes") {
     dependsOn("copyShadowClasses")
 }
 
-// prior 7.13
-tasks.findByName("validateNebulaPom")?.enabled = false
-// 7.13 and after
+tasks.matching { it.name in setOf("generateTestBuildInfo", "pluginProperties") }.configureEach {
+    dependsOn("copyShadowClasses")
+}
+
 tasks.findByName("validateElasticPom")?.enabled = false
 
 tasks.register("deb", com.netflix.gradle.plugins.deb.Deb::class) {
@@ -108,7 +107,6 @@ tasks.register("deb", com.netflix.gradle.plugins.deb.Deb::class) {
     packageName = "elasticsearch-$pluginName-plugin"
 
     requires("elasticsearch", versions["elasticsearch"])
-        .or("elasticsearch-oss", versions["elasticsearch"])
 
     from(zipTree(tasks["bundlePlugin"].outputs.files.singleFile))
 
@@ -117,7 +115,7 @@ tasks.register("deb", com.netflix.gradle.plugins.deb.Deb::class) {
 
     doLast {
         if (properties.containsKey("assembledInfo")) {
-            val distDir = Paths.get(buildDir.path, "distributions")
+            val distDir = layout.buildDirectory.dir("distributions").get().asFile.toPath()
             distDir.resolve("assembled-deb.filename").toFile()
                 .writeText(assembleArchiveName())
         }
